@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
@@ -43,14 +42,9 @@ func main() {
 		logger: logger,
 	}
 
-	// Define a router to route requests
-	// then a health check handler
-	route := gin.Default()
-	route.GET("/health", app.healthcheckHandler)
-
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      route,
+		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Minute * 10,
 		WriteTimeout: time.Minute * 30,
