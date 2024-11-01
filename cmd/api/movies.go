@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/duongbm/greenlight-gin/internal/data"
+	"github.com/duongbm/greenlight-gin/internal/validator"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -20,6 +21,21 @@ func (app *application) createMovieHandler(c *gin.Context) {
 		app.badRequestResponse(c, err)
 		return
 	}
+
+	movie := &data.Movie{
+		Title:   input.Title,
+		Year:    input.Year,
+		Runtime: input.Runtime,
+		Genres:  input.Genres,
+	}
+
+	v := validator.New()
+
+	if data.ValidateMovie(v, movie); !v.Valid() {
+		app.failedValidationResponse(c, v.Errors)
+		return
+	}
+
 	c.JSON(http.StatusOK, "create new movie")
 }
 
