@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/duongbm/greenlight-gin/internal/data"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,6 +10,17 @@ import (
 )
 
 func (app *application) createMovieHandler(c *gin.Context) {
+	var input struct {
+		Title   string   `json:"title"`
+		Year    int32    `json:"year"`
+		Runtime int32    `json:"runtime"`
+		Genres  []string `json:"genres"`
+	}
+	err := json.NewDecoder(c.Request.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	c.JSON(http.StatusOK, "create new movie")
 }
 

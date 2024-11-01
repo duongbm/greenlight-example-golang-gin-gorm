@@ -13,5 +13,6 @@ func (app *application) routes() *gin.Engine {
 
 	// movies handler
 	router.GET("/movies/:id", app.showMovieHandler)
+	router.POST("/movies", app.createMovieHandler)
 	return router
 }
