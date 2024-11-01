@@ -7,5 +7,8 @@ func (app *application) routes() *gin.Engine {
 
 	// health check handler
 	router.GET("/health", app.healthcheckHandler)
+
+	// movies handler
+	router.GET("/movies/:id", app.showMovieHandler)
 	return router
 }
