@@ -28,3 +28,7 @@ func (app *application) methodNotAllowedResponse(c *gin.Context) {
 	message := "the request method is not allowed"
 	app.errorResponse(c, http.StatusMethodNotAllowed, message)
 }
+
+func (app *application) badRequestResponse(c *gin.Context, err error) {
+	app.errorResponse(c, http.StatusBadRequest, err.Error())
+}
