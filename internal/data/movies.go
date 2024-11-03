@@ -16,7 +16,19 @@ func (m *MovieModel) Insert(movie *Movie) error {
 }
 
 func (m *MovieModel) Get(id int64) (*Movie, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	var movie Movie
+	query := m.DB.Table("movies").Find(&movie, id)
+	if query.RowsAffected == 0 {
+		return nil, ErrRecordNotFound
+	}
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return &movie, nil
 }
 
 func (m *MovieModel) Update(movie *Movie) error {
