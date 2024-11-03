@@ -4,6 +4,7 @@ import (
 	"github.com/duongbm/greenlight-gin/internal/validator"
 	pq "github.com/lib/pq"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -32,11 +33,21 @@ func (m *MovieModel) Get(id int64) (*Movie, error) {
 }
 
 func (m *MovieModel) Update(movie *Movie) error {
-	return nil
+	query := m.DB.Clauses(clause.Returning{}).
+		Table("movies").
+		Where("id = ?", movie.Id).Updates(&movie)
+	if query.RowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return query.Error
 }
 
 func (m *MovieModel) Delete(id int64) error {
-	return nil
+	query := m.DB.Table("movies").Where("id = ?", id).Delete(&Movie{})
+	if query.RowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return query.Error
 }
 
 type Movie struct {
