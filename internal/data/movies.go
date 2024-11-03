@@ -2,8 +2,29 @@ package data
 
 import (
 	"github.com/duongbm/greenlight-gin/internal/validator"
+	"gorm.io/gorm"
 	"time"
 )
+
+type MovieModel struct {
+	DB *gorm.DB
+}
+
+func (m *MovieModel) Insert(movie *Movie) error {
+	return nil
+}
+
+func (m *MovieModel) Get(id int64) (*Movie, error) {
+	return nil, nil
+}
+
+func (m *MovieModel) Update(movie *Movie) error {
+	return nil
+}
+
+func (m *MovieModel) Delete(id int64) error {
+	return nil
+}
 
 type Movie struct {
 	Id        int64     `json:"id"`
