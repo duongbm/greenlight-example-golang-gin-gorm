@@ -36,7 +36,13 @@ func (app *application) createMovieHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "create new movie")
+	err = app.models.Movies.Insert(movie)
+	if err != nil {
+		app.serverErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, movie)
 }
 
 func (app *application) showMovieHandler(c *gin.Context) {

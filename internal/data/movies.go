@@ -2,6 +2,7 @@ package data
 
 import (
 	"github.com/duongbm/greenlight-gin/internal/validator"
+	pq "github.com/lib/pq"
 	"gorm.io/gorm"
 	"time"
 )
@@ -11,7 +12,7 @@ type MovieModel struct {
 }
 
 func (m *MovieModel) Insert(movie *Movie) error {
-	return nil
+	return m.DB.Table("movies").Create(movie).Error
 }
 
 func (m *MovieModel) Get(id int64) (*Movie, error) {
@@ -27,13 +28,13 @@ func (m *MovieModel) Delete(id int64) error {
 }
 
 type Movie struct {
-	Id        int64     `json:"id"`
-	CreatedAt time.Time `json:"-"`
-	Title     string    `json:"title"`
-	Year      int32     `json:"year,omitempty"`
-	Runtime   Runtime   `json:"runtime,omitempty"`
-	Genres    []string  `json:"genres,omitempty"`
-	Version   int32     `json:"version"`
+	Id        int64          `json:"id"`
+	CreatedAt time.Time      `json:"-"`
+	Title     string         `json:"title"`
+	Year      int32          `json:"year,omitempty"`
+	Runtime   Runtime        `json:"runtime,omitempty"`
+	Genres    pq.StringArray `json:"genres,omitempty" gorm:"type:text[]"`
+	Version   int32          `json:"version"`
 }
 
 func ValidateMovie(v *validator.Validator, movie *Movie) {
