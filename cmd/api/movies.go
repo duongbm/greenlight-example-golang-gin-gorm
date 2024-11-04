@@ -183,3 +183,34 @@ func (app *application) partialUpdateMovieHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, movie)
 }
+
+func (app *application) listMovieHandler(c *gin.Context) {
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filters
+	}
+
+	v := validator.New()
+
+	qs := c.Request.URL.Query()
+	input.Title = app.readString(qs, "title", "")
+	input.Genres = app.readList(qs, "genres", []string{})
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafeList = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(c, v.Errors)
+		return
+	}
+
+	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, movies)
+}

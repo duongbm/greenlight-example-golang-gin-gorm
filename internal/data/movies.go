@@ -53,6 +53,18 @@ func (m *MovieModel) Delete(id int64) error {
 	return query.Error
 }
 
+func (m *MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+	var movies []*Movie
+	q := m.DB.Debug().Model(&Movie{}).
+		Where("(LOWER(title) = LOWER(@title) OR @title = '') AND (genres @> @genres OR @genres = '{}')",
+			map[string]interface{}{"title": title, "genres": pq.Array(genres)}).
+		Find(&movies)
+	if q.RowsAffected == 0 {
+		return nil, ErrRecordNotFound
+	}
+	return movies, q.Error
+}
+
 type Movie struct {
 	Id        int64          `json:"id"`
 	CreatedAt time.Time      `json:"-"`

@@ -12,6 +12,7 @@ func (app *application) routes() *gin.Engine {
 	router.GET("/health", app.healthcheckHandler)
 
 	// movies handler
+	router.GET("/movies", app.listMovieHandler)
 	router.GET("/movies/:id", app.showMovieHandler)
 	router.PUT("/movies/:id", app.updateMovieHandler)
 	router.PATCH("/movies/:id", app.partialUpdateMovieHandler)
