@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
-func (app *application) logError(err error) {
-	app.logger.Println(err)
+func (app *application) logError(c *gin.Context, err error) {
+	app.logger.Error(err, map[string]string{"request_method": c.Request.Method, "request_url": c.Request.URL.String()})
 }
 
 func (app *application) errorResponse(c *gin.Context, status int, message interface{}) {
@@ -14,7 +14,7 @@ func (app *application) errorResponse(c *gin.Context, status int, message interf
 }
 
 func (app *application) serverErrorResponse(c *gin.Context, err error) {
-	app.logError(err)
+	app.logError(c, err)
 	message := "the server encountered a problem and could not process the request"
 	app.errorResponse(c, http.StatusInternalServerError, message)
 }

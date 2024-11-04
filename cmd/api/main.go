@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/duongbm/greenlight-gin/internal/data"
+	"github.com/duongbm/greenlight-gin/internal/jsonlog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -32,7 +33,7 @@ type config struct {
 // define an application struct to hold dependencies for HTTP handler, helper, middlewares, ...
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models data.Models
 }
 
@@ -49,15 +50,15 @@ func main() {
 	flag.Parse()
 
 	// Initialize a new logger which write messages to the standard out stream
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	// call openDB() to create then connection pool
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal(err, nil)
 	}
 
-	logger.Printf("database connection pool established.")
+	logger.Info("database connection pool established.", nil)
 
 	// Declare an instance of application struct, containing the config struct and logger
 	app := &application{
@@ -72,12 +73,16 @@ func main() {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Minute * 10,
 		WriteTimeout: time.Minute * 30,
+		ErrorLog:     log.New(logger, "", 0),
 	}
 
 	// Start HTTP Server
-	logger.Printf("Starting %s server on %d", cfg.env, cfg.port)
+	logger.Info("staring server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.env,
+	})
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	logger.Fatal(err, nil)
 }
 
 func openDB(cfg config) (*gorm.DB, error) {
