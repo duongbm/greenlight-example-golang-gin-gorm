@@ -206,11 +206,14 @@ func (app *application) listMovieHandler(c *gin.Context) {
 		return
 	}
 
-	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, movies)
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"metadata": metadata,
+		"data":     movies,
+	})
 }

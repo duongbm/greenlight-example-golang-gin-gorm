@@ -54,20 +54,32 @@ func (m *MovieModel) Delete(id int64) error {
 	return query.Error
 }
 
-func (m *MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+func (m *MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
 	var movies []*Movie
+	var listMovies []struct {
+		Count int
+		*Movie
+	}
 	q := m.DB.Debug().Model(&Movie{}).
 		Where(`
 			(to_tsvector('simple', title) @@ plainto_tsquery('simple', @title) OR @title = '') 
 			AND (genres @> @genres OR @genres = '{}')`,
 			map[string]interface{}{"title": title, "genres": pq.Array(genres)}).
 		Order(fmt.Sprintf("%s %s,id ASC", filters.sortColum(), filters.sortDirection())).
-		Find(&movies)
+		Limit(filters.limit()).
+		Offset(filters.offset()).
+		Select("count(*) OVER() as count, *").
+		Find(&listMovies)
 
 	if q.RowsAffected == 0 {
-		return nil, ErrRecordNotFound
+		return nil, Metadata{}, ErrRecordNotFound
 	}
-	return movies, q.Error
+
+	for _, item := range listMovies {
+		movies = append(movies, item.Movie)
+	}
+	metadata := calculateMetadata(listMovies[0].Count, filters.Page, filters.PageSize)
+	return movies, metadata, q.Error
 }
 
 type Movie struct {
