@@ -13,3 +13,10 @@
 # Advantage
 
 - Encapsulate Routing
+- Custom encode/decode JSON
+- Manage HTTP response
+- Validating JSON input
+- Setup GORM, optimize connection pool
+- SQL Migrate
+- Perform CRUD (GET, POST, PUT, PATCH, DELETE)
+- Optimistic Concurrency Control
