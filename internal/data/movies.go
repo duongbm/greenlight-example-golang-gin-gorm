@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"github.com/duongbm/greenlight-gin/internal/validator"
 	pq "github.com/lib/pq"
 	"gorm.io/gorm"
@@ -60,8 +61,9 @@ func (m *MovieModel) GetAll(title string, genres []string, filters Filters) ([]*
 			(to_tsvector('simple', title) @@ plainto_tsquery('simple', @title) OR @title = '') 
 			AND (genres @> @genres OR @genres = '{}')`,
 			map[string]interface{}{"title": title, "genres": pq.Array(genres)}).
-		Find(&movies).
-		Order("id")
+		Order(fmt.Sprintf("%s %s,id ASC", filters.sortColum(), filters.sortDirection())).
+		Find(&movies)
+
 	if q.RowsAffected == 0 {
 		return nil, ErrRecordNotFound
 	}
