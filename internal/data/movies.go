@@ -4,7 +4,6 @@ import (
 	"github.com/duongbm/greenlight-gin/internal/validator"
 	pq "github.com/lib/pq"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -33,13 +32,17 @@ func (m *MovieModel) Get(id int64) (*Movie, error) {
 }
 
 func (m *MovieModel) Update(movie *Movie) error {
-	query := m.DB.Clauses(clause.Returning{}).
-		Table("movies").
-		Where("id = ?", movie.Id).Updates(&movie)
-	if query.RowsAffected == 0 {
+	query := `
+		UPDATE movies
+		SET title = ?, year = ?, runtime = ?, genres = ? , version = version + 1
+		WHERE id = ? AND version = ?
+		RETURNING version`
+
+	tx := m.DB.Raw(query, movie.Title, movie.Year, movie.Runtime, movie.Genres, movie.Id, movie.Version).Scan(&movie)
+	if tx.RowsAffected == 0 {
 		return ErrRecordNotFound
 	}
-	return query.Error
+	return tx.Error
 }
 
 func (m *MovieModel) Delete(id int64) error {

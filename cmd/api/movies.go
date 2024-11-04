@@ -173,7 +173,12 @@ func (app *application) partialUpdateMovieHandler(c *gin.Context) {
 
 	err = app.models.Movies.Update(movie)
 	if err != nil {
-		app.serverErrorResponse(c, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(c)
+		default:
+			app.serverErrorResponse(c, err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, movie)
