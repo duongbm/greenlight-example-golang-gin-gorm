@@ -10,13 +10,25 @@
 
 * Note: any packages that lives under `internal` can only import by code inside the parent of the this directory.
 
-# Advantage
+# Features
 
-- Encapsulate Routing
-- Custom encode/decode JSON
-- Manage HTTP response
-- Validating JSON input
-- Setup GORM, optimize connection pool
-- SQL Migrate
-- Perform CRUD (GET, POST, PUT, PATCH, DELETE)
-- Optimistic Concurrency Control
+- [x] Encapsulate Routing
+- [x] Custom encode/decode JSON
+- [x] Manage HTTP response
+- [x] Validating JSON input
+- [x] Setup GORM, optimize connection pool
+- [x] SQL Migrate
+- [x] Perform simple CRUD (GET, POST, PUT, PATCH, DELETE)
+- [x] Optimistic Concurrency Control
+- [x] Filter(Simple full text search), Sort, Pagination
+- [x] Structured JSON log entries
+- [x] Panic Recover Middleware
+- [ ] Rate Limit
+- [ ] Manage SQL query timeout
+- [ ] User Model & Registration
+- [ ] Sending emails
+- [ ] User Activation
+- [ ] Authentication
+- [ ] Permissions
+- [ ] Metrics
+- [ ] Building, Versioning and Quality control
