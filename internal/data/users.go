@@ -18,10 +18,11 @@ type UserModel struct {
 }
 
 func (m *UserModel) Insert(user *User) error {
+	user.PasswordHash = user.Password.hash
 	query := m.DB.Create(&user)
 	if query.Error != nil {
 		switch {
-		case query.Error.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case query.Error.Error() == `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`:
 			return ErrDuplicateEmail
 		default:
 			return query.Error
@@ -47,7 +48,7 @@ func (m *UserModel) Update(user *User) error {
 	query := m.DB.Clauses(clause.Returning{}).Where("id = ?", user.Id).Updates(&user)
 	if query.Error != nil {
 		switch {
-		case query.Error.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case query.Error.Error() == `ERROR: duplicate key value violates unique constraint "users_email_key" (SQLSTATE 23505)`:
 			return ErrDuplicateEmail
 		case errors.Is(query.Error, gorm.ErrRecordNotFound):
 			return ErrEditConflict
@@ -59,13 +60,14 @@ func (m *UserModel) Update(user *User) error {
 }
 
 type User struct {
-	Id        int64     `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  password  `json:"-"`
-	Activated bool      `json:"activated"`
-	Version   int       `json:"-"`
+	Id           int64     `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Password     password  `json:"-" gorm:"-"`
+	PasswordHash []byte    `json:"-"`
+	Activated    bool      `json:"activated"`
+	Version      int       `json:"-"`
 }
 
 type password struct {

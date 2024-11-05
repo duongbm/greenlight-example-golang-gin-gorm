@@ -21,5 +21,7 @@ func (app *application) routes() *gin.Engine {
 	router.PATCH("/movies/:id", app.partialUpdateMovieHandler)
 	router.DELETE("/movies/:id", app.deleteMovieHandler)
 	router.POST("/movies", app.createMovieHandler)
+
+	router.POST("/users", app.registerUserHandler)
 	return router
 }
