@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/duongbm/greenlight-gin/internal/data"
 	"github.com/duongbm/greenlight-gin/internal/jsonlog"
+	"github.com/duongbm/greenlight-gin/internal/mailer"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -28,6 +29,13 @@ type config struct {
 		MaxIdleConn int
 		maxIdleTime string
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 // define an application struct to hold dependencies for HTTP handler, helper, middlewares, ...
@@ -35,6 +43,7 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -48,6 +57,13 @@ func main() {
 	flag.IntVar(&cfg.db.MaxIdleConn, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max idle timeout")
 	flag.Parse()
+
+	//SMTP config
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP server host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP server port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "6618a4d7f9af60", "SMTP server username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "70ae820f1324af", "SMTP server password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.duongbm.net>", "SMTP sender")
 
 	// Initialize a new logger which write messages to the standard out stream
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -65,6 +81,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	srv := &http.Server{

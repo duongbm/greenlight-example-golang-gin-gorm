@@ -52,5 +52,12 @@ func (app *application) registerUserHandler(c *gin.Context) {
 		return
 	}
 
+	app.background(func() {
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			app.logger.Error(err, nil)
+		}
+	})
+
 	c.JSON(http.StatusCreated, user)
 }
