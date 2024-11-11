@@ -3,14 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/duongbm/greenlight-gin/internal/data"
 	"github.com/duongbm/greenlight-gin/internal/jsonlog"
 	"github.com/duongbm/greenlight-gin/internal/mailer"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
 	"os"
 	"time"
 )
@@ -84,22 +81,11 @@ func main() {
 		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf("localhost:%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  time.Minute * 10,
-		WriteTimeout: time.Minute * 30,
-		ErrorLog:     log.New(logger, "", 0),
-	}
-
+	err = app.serve()
 	// Start HTTP Server
-	logger.Info("staring server", map[string]string{
-		"addr": srv.Addr,
-		"env":  cfg.env,
-	})
-	err = srv.ListenAndServe()
-	logger.Fatal(err, nil)
+	if err != nil {
+		logger.Fatal(err, nil)
+	}
 }
 
 func openDB(cfg config) (*gorm.DB, error) {
